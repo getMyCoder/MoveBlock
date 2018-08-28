@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="jquery.css"/>
+    <script type="text/javascript" src="jquery.js"></script>
+    <style type="text/css">
+        .main{width: 100%;overflow: hidden;position: relative;}
+        .con{width: 100%;position: relative;}
+        .con p{width: 100%;height: 40px;overflow: hidden;position: absolute;top: -40px;left: 0;}
+        .con p span{display: block;width: 25%;background: #ccc;height: 40px;border:solid #fff;border-width: 0 0 0 1px; box-sizing: border-box;position: absolute;top: 1px;}
+        .bgBox{position: absolute;z-index: 999;overflow: hidden;width: 100%;top: 0;left: 0;}
+        .bgBox p{float: left;width: 25%;position: relative;}
+        .bgBox p span{width: 100%;display: block;height: 40px;background: #2384c2;border:solid #fff;border-width: 0 0 0 1px; box-sizing: border-box;position: absolute;left: 0;bottom: 0;}
+        .error{background: rgba(0,0,0,0.5);position: absolute;top: 0;left: 0;z-index: 9999;display: none;}
+        .erB{width: 80%;margin-left: 10%;background: rgba(255,255,255,0.5);padding: 20px 0;border-radius: 5px;}
+        .erB p{width: 100%;height: 40px;line-height: 40px;text-align: center;color: #2384c2;font-size: 20px;font-weight: bold;}
+        .erB p span{font-size: 20px;font-weight: bold;}
+        .val{position: absolute;height: 40px;line-height: 40px;width: 100%;text-align: center; background: #2384c2;color: #fff;font-size: 16px; display: none;}
+        .start{position: absolute;background: rgba(255,255,255,0.5);z-index: 99999;}
+        .stCon{width: 25px;height: 40px;position: absolute;}
+        .start img{width: 25px;height:40px;}
+    </style>
+</head>
+<body>
+<div class="main">
+     <div class="con">
+         <p><span></span><span></span><span></span></p>
+     </div>
+    <div class="bgBox">
+        <p></p><p></p><p></p><p></p>
+    </div>
+    <div class="val">0</div>
+    <div class="start">
+        <div class="stCon">
+            <img src="start.png" alt="">
+        </div>
+    </div>
+</div>
+<div class="error">
+    <div class="erB">
+       <p>分数：<span class="endV"></span></p>
+       <p>GAMEOVER</p>
+       <p>There's only one chance！</p>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        var DW=document.documentElement.clientWidth;
+        var DH=document.documentElement.clientHeight;
+        var itemsArr=[0,DW*0.25,DW*0.5,DW*0.75],DelArr=[],spaceArr=[];
+        var itemsIndex=0,itemsID=0,itemsTS=0;
+        var speedTop=20,speedTopStep=1;
+        var speedBottom=3,speedBottomStep=10;
+        var itemsHeight=$(".con p").height();
+        var stopMove=true;
+        var itemRemove=0;
+        var EndVal=0;
+        $(".start").css({"width":DW+"px","height":DH+"px"});
+        $(".stCon").css({"left":(DW-$(".stCon").width())/2+"px","top":DH*0.4+"px"});
+        $(".main").css({"width":DW+"px","height":DH+"px"});
+        $(".error").css({"width":DW+"px","height":DH+"px"});
+        $(".erB").css({"marginTop":DH*0.3+"px"});
+        $(".stCon").click(function () {
+            $(".start").hide();
+            $(".val").show();
+            for (var i=0;i<itemsArr.length;i++){
+                DelArr[i]=itemsArr[i]
+            }
+            $(".con p span").each(function () {
+                itemsID=parseInt(Math.random()*DelArr.length);
+                itemsIndex=DelArr[itemsID];
+                $(this).css({"left":itemsIndex+"px"});
+                DelArr.splice(itemsID,1);
+                if (DelArr.length==1){
+                    spaceArr.push(DelArr[0]);
+                }
+            });
+            getMoveTop($(".con p").eq(itemsTS));
+    //top------>bottom
+            function getMoveTop(Div) {
+                Div.TspeadB=speedTopStep;
+                Div.TBmoveTimer=setInterval(function () {
+                    if (stopMove==false){
+                        clearInterval(Div.TBmoveTimer);
+                        speedTopStep=0;
+                        $(".error").show();
+                        $(".endV").html($(".val").html())
+                    }
+                    Div.css({"top":Div.TspeadB-40+"px"});
+
+                    if ($(".con p").eq(itemRemove).offset().top+itemsHeight>=DH){
+                        clearInterval(Div.TBmoveTimer);
+                        stopMove=false;
+                        speedTopStep=0;
+                        $(".error").show();
+                        $(".endV").html($(".val").html())
+                    }
+                    if(Div.offset().top==0){
+                        itemsTS++;
+                        $(".con").append("<p><span></span><span></span><span></span></p>");
+                        var DelArr=[];
+                        for (var i=0;i<itemsArr.length;i++){
+                            DelArr[i]=itemsArr[i]
+                        }
+                        $(".con p").eq(itemsTS).find("span").each(function () {
+                            itemsID=parseInt(Math.random()*DelArr.length);
+                            itemsIndex=DelArr[itemsID];
+                            $(this).css({"left":itemsIndex+"px"});
+                            DelArr.splice(itemsID,1);
+                            if (DelArr.length==1){
+                                spaceArr.push(DelArr[0])
+                            }
+                        });
+                        getMoveTop($(".con p").eq(itemsTS))
+                    }
+                    Div.TspeadB+=speedTopStep;
+                },speedTop);
+            }
+    //bottom------>top
+            $(".bgBox p").css({"height":DH+"px"});
+            $(".bgBox p").each(function () {
+                $(this).click(function () {
+                    var that=$(this);
+                    $(this).append("<span></span>");
+                    getMove($(that).find("span").last())
+                });
+            });
+            var textVal=0;
+            function getMove(Div) {
+                var oneDir=$(".con p").eq(itemRemove);
+                Div.BspeadT=speedBottomStep;
+                clearInterval(Div.BTmoveTimer);
+                Div.BTmoveTimer=setInterval(function () {
+                    Div.css({"bottom":Div.BspeadT+"px"});
+                    if (Div.BspeadT>=DH-itemsHeight){
+                        clearInterval(Div.BTmoveTimer);
+                    }
+                    if (Div.offset().left==spaceArr[itemRemove] && Math.abs(Div.offset().top-oneDir.offset().top)<=5){
+                        $(".con p").eq(itemRemove).css({
+                            "height":0,
+                            "width":0
+                        });
+                        Div.remove();
+                        clearInterval(Div.BTmoveTimer);
+                        EndVal+=100;
+                        $(".val").html(EndVal);
+                        if (itemRemove-textVal==10){
+                            if (speedTop<=1){
+                                speedTop=1;
+                            }else{
+                                speedTop--;
+                            }
+                            textVal=itemRemove;
+                        }
+                        console.log(textVal);
+                        itemRemove++
+                   }else if (Div.offset().left!=spaceArr[itemRemove] && (Div.offset().top-oneDir.offset().top)<=(itemsHeight)){
+                        clearInterval(Div.BTmoveTimer);
+                        stopMove=false;
+                        Div.css({
+                            "top":oneDir.offset().top+itemsHeight+"px"
+                        })
+                    }
+                    Div.BspeadT+=speedBottomStep;
+                },speedBottom);
+            }
+        });
+    })
+</script>
+</body>
+</html>
