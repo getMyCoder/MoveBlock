@@ -4,13 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Document</title>
+    <title>BLOCK</title>
     <link rel="stylesheet" type="text/css" href="jquery.css"/>
     <script type="text/javascript" src="jquery.js"></script>
     <style type="text/css">
         .main{width: 100%;overflow: hidden;position: relative;}
-        .con{width: 100%;position: absolute;top: -40px;left: 0;}
-        .con p{width: 100%;height: 40px;overflow: hidden;position: absolute;left: 0;}
+        .con{width: 100%;position: relative;}
+        .con p{width: 100%;height: 40px;overflow: hidden;position: absolute;top: -40px;left: 0;}
         .con p span{display: block;width: 25%;background: #2384c2;height: 40px;border:solid #fff;border-width: 0 0 0 1px; box-sizing: border-box;position: absolute;top: 1px;}
         .bgBox{position: absolute;z-index: 999;overflow: hidden;width: 100%;top: 0;left: 0;}
         .bgBox p{float: left;width: 25%;position: relative;}
@@ -19,7 +19,7 @@
         .erB{width: 80%;margin-left: 10%;background: rgba(255,255,255,0.5);padding: 20px 0;border-radius: 5px;}
         .erB p{width: 100%;height: 40px;line-height: 40px;text-align: center;color: #2384c2;font-size: 20px;font-weight: bold;}
         .erB p span{font-size: 20px;font-weight: bold;}
-        .val{position: absolute;height: 40px;line-height: 40px;width: 100%;text-align: center;background: rgba(255,255,255,0.95);color: #2384c2;font-size: 16px; display: none;}
+        .val{position: absolute;height: 40px;line-height: 40px;width: 100%;text-align: center; background: rgba(255,255,255,0.95);color: #2384c2;font-size: 16px; display: none;}
         .start{position: absolute;background: rgba(255,255,255,0.5);z-index: 99999;}
         .stCon{width: 25px;height: 40px;position: absolute;}
         .start img{width: 25px;height:40px;}
@@ -79,34 +79,34 @@
                     spaceArr.push(DelArr[0]);
                 }
             });
+            getMoveTop($(".con p").eq(itemsTS));
     //top------>bottom
-                var TspeadB=speedTopStep;
-                var TBmoveTimer=setInterval(function () {
+            function getMoveTop(Div) {
+                Div.TspeadB=speedTopStep;
+                Div.TBmoveTimer=setInterval(function () {
                     if (stopMove==false){
-                        clearInterval(TBmoveTimer);
+                        clearInterval(Div.TBmoveTimer);
                         speedTopStep=0;
                         $(".error").show();
                         $(".endV").html($(".val").html())
                     }
-                    $(".con").css({"top":TspeadB-40+"px"});
-                    if ($(".con p").eq(0).offset().top+itemsHeight>=DH){
-                        clearInterval(TBmoveTimer);
+                    Div.css({"top":Div.TspeadB-40+"px"});
+
+                    if ($(".con p").eq(itemRemove).offset().top+itemsHeight>=DH){
+                        clearInterval(Div.TBmoveTimer);
                         stopMove=false;
                         speedTopStep=0;
                         $(".error").show();
                         $(".endV").html($(".val").html())
                     }
-                    if($(".con p").last().offset().top==0){
+                    if(Div.offset().top==0){
                         itemsTS++;
                         $(".con").append("<p><span></span><span></span><span></span></p>");
                         var DelArr=[];
                         for (var i=0;i<itemsArr.length;i++){
                             DelArr[i]=itemsArr[i]
                         }
-                        $(".con p").last().css({
-                          "bottom":(itemsTS-1)*itemsHeight+"px"
-                        });
-                        $(".con p").last().find("span").each(function () {
+                        $(".con p").eq(itemsTS).find("span").each(function () {
                             itemsID=parseInt(Math.random()*DelArr.length);
                             itemsIndex=DelArr[itemsID];
                             $(this).css({"left":itemsIndex+"px"});
@@ -115,9 +115,11 @@
                                 spaceArr.push(DelArr[0])
                             }
                         });
+                        getMoveTop($(".con p").eq(itemsTS))
                     }
-                    TspeadB+=speedTopStep;
+                    Div.TspeadB+=speedTopStep;
                 },speedTop);
+            }
     //bottom------>top
             $(".bgBox p").css({"height":DH+"px"});
             $(".bgBox p").each(function () {
@@ -129,7 +131,7 @@
             });
             var textVal=0;
             function getMove(Div) {
-                var oneDir=$(".con p").eq(0);
+                var oneDir=$(".con p").eq(itemRemove);
                 Div.BspeadT=speedBottomStep;
                 clearInterval(Div.BTmoveTimer);
                 Div.BTmoveTimer=setInterval(function () {
@@ -137,9 +139,11 @@
                     if (Div.BspeadT>=DH-itemsHeight){
                         clearInterval(Div.BTmoveTimer);
                     }
-                    if (Div.offset().left==spaceArr[0] && Math.abs(Div.offset().top-oneDir.offset().top)<=5){
-                        spaceArr.splice(0,1);
-                        $(".con p").eq(0).remove();
+                    if (Div.offset().left==spaceArr[itemRemove] && Math.abs(Div.offset().top-oneDir.offset().top)<=5){
+                        $(".con p").eq(itemRemove).css({
+                            "height":0,
+                            "width":0
+                        });
                         Div.remove();
                         clearInterval(Div.BTmoveTimer);
                         EndVal+=100;
@@ -152,8 +156,9 @@
                             }
                             textVal=itemRemove;
                         }
+                        console.log(textVal);
                         itemRemove++
-                   }else if (Div.offset().left!=spaceArr[0] && (Div.offset().top-oneDir.offset().top)<=(itemsHeight)){
+                   }else if (Div.offset().left!=spaceArr[itemRemove] && (Div.offset().top-oneDir.offset().top)<=(itemsHeight)){
                         clearInterval(Div.BTmoveTimer);
                         stopMove=false;
                         Div.css({
